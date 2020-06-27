@@ -72,7 +72,7 @@ class MainWindow(UI):
         # video 初始设置
         self.video_capture = cv2.VideoCapture()
 
-        # self.progress.valueChanged.connect(self.get_frame)
+        self.progress.valueChanged.connect(self.get_frame_)
 
     def action_double_clicked(self):
         if self.video_capture.isOpened():
@@ -117,12 +117,19 @@ class MainWindow(UI):
         else:
             return self.main.width(), self.main.width() / (self.video_width / self.video_height)
 
+    def get_frame_(self, num=None):
+        if not self.timer.playing:
+            self.get_frame(num)
+
     def get_frame(self, num=None):
         if self.video_capture.isOpened():
-            print(num, '/', self.video_total_frames)
-            # num = self.video_capture.get(cv2.CAP_PROP_POS_FRAMES) if num is None else num
-            # self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, num)
-            self.progress.setValue(self.video_capture.get(cv2.CAP_PROP_POS_FRAMES))
+            print(num, '/', self.video_capture.get(cv2.CAP_PROP_POS_FRAMES), '/', self.video_total_frames)
+            if num is not None:
+                self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, num)
+                self.progress.setValue(num)
+            else:
+                self.progress.setValue(self.video_capture.get(cv2.CAP_PROP_POS_FRAMES) + 1)
+
             success, frame = self.video_capture.read()
             if success:
                 self.current_frame = QImage(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB).flatten(),
