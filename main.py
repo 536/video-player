@@ -29,7 +29,7 @@ class CommonHelper(object):
 
 
 class VideoTimer(QThread):
-    signal = pyqtSignal()
+    update_frame_signal = pyqtSignal()
 
     def __init__(self):
         super(VideoTimer, self).__init__()
@@ -41,7 +41,7 @@ class VideoTimer(QThread):
         with QMutexLocker(self.mutex):
             self.playing = True
         while self.playing:
-            self.signal.emit()
+            self.update_frame_signal.emit()
             time.sleep(1 / self.fps)
 
     def pause(self):
@@ -68,9 +68,11 @@ class MainWindow(UI):
 
         # timer 设置
         self.timer = VideoTimer()
-        self.timer.signal.connect(self.show_video_images)
+        self.timer.update_frame_signal.connect(self.get_frame)
         # video 初始设置
         self.video_capture = cv2.VideoCapture()
+
+        # self.progress.valueChanged.connect(self.get_frame)
 
     def action_double_clicked(self):
         if self.video_capture.isOpened():
@@ -87,7 +89,11 @@ class MainWindow(UI):
         self.video_height = self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.video_width = self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.timer.fps = self.video_fps
-        self.show_video_images()
+        self.progress.setMaximum(self.video_total_frames)
+
+        self.get_frame()
+        self.cap_prop_pos_msec = self.video_capture.get(cv2.CAP_PROP_POS_MSEC)
+        self.cap_prop_pos_frames = self.video_capture.get(cv2.CAP_PROP_POS_FRAMES)
 
     def action_open(self):
         video_url, _ = QFileDialog.getOpenFileName(self, 'Video Player', '', '*.mp4;;*.mkv;;*.rmvb')
@@ -111,17 +117,16 @@ class MainWindow(UI):
         else:
             return self.main.width(), self.main.width() / (self.video_width / self.video_height)
 
-    def show_video_images(self):
+    def get_frame(self, num=None):
         if self.video_capture.isOpened():
+            print(num, '/', self.video_total_frames)
+            # num = self.video_capture.get(cv2.CAP_PROP_POS_FRAMES) if num is None else num
+            # self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, num)
+            self.progress.setValue(self.video_capture.get(cv2.CAP_PROP_POS_FRAMES))
             success, frame = self.video_capture.read()
             if success:
-                if frame.ndim == 3:
-                    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                elif frame.ndim == 2:
-                    rgb = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-
-                self.current_frame = QImage(rgb.flatten(), self.video_width, self.video_height, QImage.Format_RGB888)
-
+                self.current_frame = QImage(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB).flatten(),
+                                            self.video_width, self.video_height, QImage.Format_RGB888)
                 self.main.setPixmap(QPixmap.fromImage(self.current_frame).scaled(*self.get_appropriate_size()))
             else:
                 self.video_capture.release()

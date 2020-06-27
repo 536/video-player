@@ -1,3 +1,3 @@
 # video-player
 
-A video player implemented by PyQt5.
+A video player implemented by PyQt5 & OpenCV.

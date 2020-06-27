@@ -1,8 +1,9 @@
 /* https://doc.qt.io/qt-5/stylesheet-examples.html */
 QWidget {
     background: #282C34;
-    color: #BBBBBB;
+    color: #626578;
 }
+
 QPushButton {
     width: 30px;
     height: 30px;
@@ -11,142 +12,36 @@ QPushButton {
     background: transparent;
     border: none;
 }
+
 QPushButton:hover {
     color: #0181E6;
 }
-QPushButton#open:hover {
-}
+
+QPushButton#open:hover {}
+
 QPushButton::disabled {
-    color: #BBBBBB;
+    color: #626578;
 }
+
 QLabel {
     text-align: center;
 }
-QTabWidget::pane {
-    border-top: 2px solid #0181E6;
+
+QSlider::groove {
 }
 
-QTabWidget::tab-bar {
+QSlider::handle {
+    background: #F5DD00;
 }
 
-QTabBar {
+QSlider::add-page:horizontal {
+    border-top: 9px solid #282C34;
+    border-bottom: 9px solid #282C34;
+    background: #626578;
 }
 
-QTabBar::tab:first {}
-QTabBar::tab:last {}
-
-QTabBar::tab {
-    color: #BBBBBB;
-    background: transparent;
-    font-family: "MicroSoft YaHei";
-    font-size: 14px;
-    width: 100px;
-    height: 40px;
-}
-
-QTabBar::tab:selected,
-QTabBar::tab:hover {
-    color: #EEEEEE;
-    background: #0181E6;
-    font-family: "MicroSoft YaHei";
-    font-size: 14px;
-}
-QTabBar::tab:!selected {
-}
-
-QTabWidget::tab-bar {
-}
-
-QProgressBar {
-    height: 1px !important;
-}
-QProgressBar::chunk{
-    background: qlineargradient(spread:pad,x1:0,y1:0,x2:1,y2:0,stop:0 #0181E6,stop:1 #E2514B);
-}
-
-QComboBox {
-}
-
-QComboBox:editable {
-    background: white;
-}
-
-QComboBox:!editable, QComboBox::drop-down:editable {
-     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                 stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
-                                 stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3);
-}
-
-/* QComboBox gets the "on" state when the popup is open */
-QComboBox:!editable:on, QComboBox::drop-down:editable:on {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-                                stop: 0 #D3D3D3, stop: 0.4 #D8D8D8,
-                                stop: 0.5 #DDDDDD, stop: 1.0 #E1E1E1);
-}
-
-QComboBox:on { /* shift the text when the popup opens */
-    padding-top: 3px;
-    padding-left: 4px;
-}
-
-QComboBox::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 15px;
-
-    border-left-width: 1px;
-    border-left-color: darkgray;
-    border-left-style: solid; /* just a single line */
-    border-top-right-radius: 3px; /* same radius as the QComboBox */
-    border-bottom-right-radius: 3px;
-}
-
-QComboBox::down-arrow {
-    image: url(/usr/share/icons/crystalsvg/16x16/actions/1downarrow.png);
-}
-
-QComboBox::down-arrow:on { /* shift the arrow when popup is open */
-    top: 1px;
-    left: 1px;
-}
-QSplitter::handle {
-    image: url(images/splitter.png);
-}
-
-QSplitter::handle:horizontal {
-    width: 2px;
-}
-
-QSplitter::handle:vertical {
-    height: 2px;
-}
-
-QSplitter::handle:pressed {
-    url(images/splitter_pressed.png);
-}
-
-QScrollBar:horizontal {
-    border: 2px solid grey;
-    background: #32CC99;
-    height: 15px;
-    margin: 0px 20px 0 20px;
-}
-QScrollBar::handle:horizontal {
-    background: white;
-    min-width: 20px;
-}
-QScrollBar::add-line:horizontal {
-    border: 2px solid grey;
-    background: #32CC99;
-    width: 20px;
-    subcontrol-position: right;
-    subcontrol-origin: margin;
-}
-
-QScrollBar::sub-line:horizontal {
-    border: 2px solid grey;
-    background: #32CC99;
-    width: 20px;
-    subcontrol-position: left;
-    subcontrol-origin: margin;
+QSlider::sub-page:horizontal {
+    border-top: 9px solid #282C34;
+    border-bottom: 9px solid #282C34;
+    background: #F5DD00;
 }

@@ -25,7 +25,6 @@ class CommonHelper(object):
 
 
 class Welcome(QLabel):
-    clicked = pyqtSignal()
     double_clicked = pyqtSignal()
 
     def __init__(self, parent=None):
@@ -34,9 +33,6 @@ class Welcome(QLabel):
         self.mouse_pressed = False
         self.mouse_position = None
 
-        self.init()
-
-    def init(self):
         self.setPixmap(QPixmap(':welcome.png'))
         self.setAlignment(QtCore.Qt.AlignCenter)
         self.setMinimumSize(640, 360)
@@ -57,6 +53,25 @@ class Welcome(QLabel):
 
     def mouseDoubleClickEvent(self, event: QMouseEvent) -> None:
         self.double_clicked.emit()
+
+
+class Slider(QSlider):
+    signal_value_changed = pyqtSignal(int)
+
+    def __init__(self, parent=None):
+        super(Slider, self).__init__()
+
+    def wheelEvent(self, e: QtGui.QWheelEvent) -> None:
+        pass
+
+    def dragMoveEvent(self, a0: QtGui.QDragMoveEvent) -> None:
+        pass
+
+    def dragLeaveEvent(self, a0: QtGui.QDragLeaveEvent) -> None:
+        print(self.value())
+
+    # def mousePressEvent(self, ev: QtGui.QMouseEvent) -> None:
+    #     pass
 
 
 class UI(QWidget):
@@ -84,7 +99,8 @@ class UI(QWidget):
         self.open.setObjectName('open')
         self.open.clicked.connect(self.action_open)
 
-        self.progress = QProgressBar(self)
+        self.progress = Slider(self)
+        self.progress.setOrientation(QtCore.Qt.Horizontal)
 
         controller_layout = QHBoxLayout()
         controller_layout.addWidget(self.play)
@@ -101,7 +117,13 @@ class UI(QWidget):
         main_layout.addLayout(controller_layout)
         self.setLayout(main_layout)
 
-    def resizeEvent(self, a0: QtGui.QResizeEvent) -> None:
+    def action_double_clicked(self):
+        pass
+
+    def action_play(self):
+        pass
+
+    def action_reset(self):
         pass
 
 
