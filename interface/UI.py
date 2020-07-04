@@ -24,11 +24,11 @@ class CommonHelper(object):
             return ''
 
 
-class Welcome(QLabel):
+class Player(QLabel):
     double_clicked = pyqtSignal()
 
     def __init__(self, parent=None):
-        super(Welcome, self).__init__(parent)
+        super(Player, self).__init__(parent)
 
         self.mouse_pressed = False
         self.mouse_position = None
@@ -56,6 +56,8 @@ class Welcome(QLabel):
 
 
 class Slider(QSlider):
+    signal_valueChanged = pyqtSignal(int)
+
     def __init__(self, parent=None):
         super(Slider, self).__init__()
 
@@ -72,7 +74,7 @@ class Slider(QSlider):
         current_x = event.pos().x()
         per = current_x * 1.0 / self.width()
         value = per * (self.maximum() - self.minimum()) + self.minimum()
-        self.setValue(value)
+        self.signal_valueChanged.emit(value)
 
 
 class UI(QWidget):
@@ -84,8 +86,8 @@ class UI(QWidget):
 
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
-        self.main = Welcome(self)
-        self.main.double_clicked.connect(self.action_double_clicked)
+        self.player = Player(self)
+        self.player.double_clicked.connect(self.action_double_clicked)
 
         self.play = QPushButton('', self)
         self.play.setIcon(QIcon(':play.svg'))
@@ -100,13 +102,16 @@ class UI(QWidget):
         self.open.setObjectName('open')
         self.open.clicked.connect(self.action_open)
 
-        self.progress = Slider(self)
-        self.progress.setOrientation(QtCore.Qt.Horizontal)
+        self.spin = QSpinBox(self)
+
+        self.slider = Slider(self)
+        self.slider.setOrientation(QtCore.Qt.Horizontal)
 
         controller_layout = QHBoxLayout()
         controller_layout.addWidget(self.play)
         controller_layout.addWidget(self.reset)
-        controller_layout.addWidget(self.progress, stretch=1)
+        controller_layout.addWidget(self.slider, stretch=1)
+        controller_layout.addWidget(self.spin)
         controller_layout.addWidget(self.open)
 
         controller_layout.setContentsMargins(0, 0, 0, 0)
@@ -114,7 +119,7 @@ class UI(QWidget):
 
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.addWidget(self.main)
+        main_layout.addWidget(self.player)
         main_layout.addLayout(controller_layout)
         self.setLayout(main_layout)
 

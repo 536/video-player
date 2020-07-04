@@ -45,3 +45,9 @@ QSlider::sub-page:horizontal {
     border-bottom: 9px solid #282C34;
     background: #F5DD00;
 }
+
+
+QSpinBox::up-button,QSpinBox::down-button
+{
+	width:0px;
+}

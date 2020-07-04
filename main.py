@@ -6,6 +6,7 @@
 # Create Time: 2020-06-01 20:54
 import sys
 import time
+import datetime
 
 import cv2
 from PyQt5 import QtCore, QtGui
@@ -29,7 +30,8 @@ class CommonHelper(object):
 
 
 class VideoTimer(QThread):
-    update_frame_signal = pyqtSignal()
+    signal_update_frame = pyqtSignal()
+    signal_finished = pyqtSignal()
 
     def __init__(self):
         super(VideoTimer, self).__init__()
@@ -41,8 +43,9 @@ class VideoTimer(QThread):
         with QMutexLocker(self.mutex):
             self.playing = True
         while self.playing:
-            self.update_frame_signal.emit()
+            self.signal_update_frame.emit()
             time.sleep(1 / self.fps)
+        self.signal_finished.emit()
 
     def pause(self):
         with QMutexLocker(self.mutex):
@@ -63,82 +66,89 @@ class MainWindow(UI):
         self.video_total_frames = 0
         self.video_height = 0
         self.video_width = 0
+        self.num = None
 
         self.current_frame = None
 
         # timer 设置
         self.timer = VideoTimer()
-        self.timer.update_frame_signal.connect(self.get_frame)
+        self.timer.signal_update_frame.connect(self.video_play)
+        self.timer.signal_finished.connect(self.video_paused)
         # video 初始设置
         self.video_capture = cv2.VideoCapture()
 
-        self.progress.valueChanged.connect(self.get_frame_)
+        self.slider.signal_valueChanged.connect(self.video_jump)
+
+    def video_jump(self, num):
+        self.num = num
+        self.slider.setValue(num)
+        self.spin.setValue(num)
+        self.get_frame(num)
+
+    def video_paused(self):
+        if self.num >= self.video_total_frames:
+            self.action_reset()
+
+    def video_play(self):
+        if self.num is None:
+            self.num = self.video_capture.get(cv2.CAP_PROP_POS_FRAMES) + 1
+        else:
+            self.num += 1
+        self.slider.setValue(self.num)
+        self.spin.setValue(self.num)
+        self.get_frame()
 
     def action_double_clicked(self):
-        if self.video_capture.isOpened():
-            self.action_play()
-        else:
-            self.action_open()
+        [self.action_open, self.action_play][self.video_capture.isOpened()]()
 
-    def action_dragged(self, video_url):
-        self.video_url = video_url
-        self.video_capture.open(filename=video_url)
-        self.setWindowTitle(f'{video_url} - {APP_NAME}')
+    def action_reset(self):
+        self.video_capture.open(filename=self.video_url)
+        self.setWindowTitle(f'{APP_NAME} - {self.video_url}')
         self.video_fps = self.video_capture.get(cv2.CAP_PROP_FPS)
         self.video_total_frames = self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT)
         self.video_height = self.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.video_width = self.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.num = None
         self.timer.fps = self.video_fps
-        self.progress.setMaximum(self.video_total_frames)
+        self.slider.setMaximum(self.video_total_frames)
+        self.spin.setSuffix(f'/{self.video_total_frames}')
+        self.spin.setMaximum(self.video_total_frames)
+        self.video_play()
 
-        self.get_frame()
-        self.cap_prop_pos_msec = self.video_capture.get(cv2.CAP_PROP_POS_MSEC)
-        self.cap_prop_pos_frames = self.video_capture.get(cv2.CAP_PROP_POS_FRAMES)
+        # self.cap_prop_pos_msec = self.video_capture.get(cv2.CAP_PROP_POS_MSEC)
 
     def action_open(self):
-        video_url, _ = QFileDialog.getOpenFileName(self, 'Video Player', '', '*.mp4;;*.mkv;;*.rmvb')
+        video_url, _ = QFileDialog.getOpenFileName(self, 'Video Player', '', '*.mp4;*.mkv;*.rmvb')
         if video_url:
-            self.action_dragged(video_url)
-
-    def action_reset(self):
-        pass
+            self.video_url = video_url
+            self.action_reset()
 
     def action_play(self):
         if self.video_capture.isOpened():
             self.play.setIcon(QIcon([':pause.svg', ':play.svg'][self.timer.playing]))
             [self.timer.start, self.timer.pause][self.timer.playing]()
         elif self.video_url:
-            self.action_dragged(self.video_url)
-            self.action_play()
+            self.action_reset()
 
     def get_appropriate_size(self):
-        if (self.main.width() / self.main.height()) > (self.video_width / self.video_height):
-            return self.main.height() * (self.video_width / self.video_height), self.main.height()
+        if (self.player.width() / self.player.height()) > (self.video_width / self.video_height):
+            return self.player.height() * (self.video_width / self.video_height), self.player.height()
         else:
-            return self.main.width(), self.main.width() / (self.video_width / self.video_height)
-
-    def get_frame_(self, num=None):
-        if not self.timer.playing:
-            self.get_frame(num)
+            return self.player.width(), self.player.width() / (self.video_width / self.video_height)
 
     def get_frame(self, num=None):
         if self.video_capture.isOpened():
-            print(num, '/', self.video_capture.get(cv2.CAP_PROP_POS_FRAMES), '/', self.video_total_frames)
             if num is not None:
                 self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, num)
-                self.progress.setValue(num)
-            else:
-                self.progress.setValue(self.video_capture.get(cv2.CAP_PROP_POS_FRAMES) + 1)
-
             success, frame = self.video_capture.read()
             if success:
                 self.current_frame = QImage(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB).flatten(),
                                             self.video_width, self.video_height, QImage.Format_RGB888)
-                self.main.setPixmap(QPixmap.fromImage(self.current_frame).scaled(*self.get_appropriate_size()))
+                self.player.setPixmap(QPixmap.fromImage(self.current_frame).scaled(*self.get_appropriate_size()))
             else:
-                self.video_capture.release()
-                self.timer.pause()
-                self.play.setIcon(QIcon(':play.svg'))
+                if self.num >= self.video_total_frames:
+                    self.timer.pause()
+                    self.play.setIcon(QIcon(':play.svg'))
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         if event.key() == QtCore.Qt.Key_Space:
@@ -147,8 +157,7 @@ class MainWindow(UI):
 
     def resizeEvent(self, event: QtGui.QResizeEvent) -> None:
         if not self.timer.playing and self.current_frame:
-            self.main.setPixmap(QPixmap.fromImage(self.current_frame).scaled(*self.get_appropriate_size()))
-        event.accept()
+            self.player.setPixmap(QPixmap.fromImage(self.current_frame).scaled(*self.get_appropriate_size()))
 
     def closeEvent(self, event: QtGui.QCloseEvent) -> None:
         if self.timer.playing:
@@ -156,12 +165,8 @@ class MainWindow(UI):
             close = QMessageBox.warning(self, APP_NAME,
                                         'Video playing, close app?',
                                         QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-            if close == QMessageBox.Yes:
-                event.accept()
-            else:
+            if close == QMessageBox.No:
                 event.ignore()
-        else:
-            event.accept()
 
 
 if __name__ == '__main__':
