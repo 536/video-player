@@ -20,3 +20,10 @@ A video player implemented by PyQt5 & OpenCV.
 1. 视频播放占用CPU较高
 
 2. 播放中点击进度条切换进度时比较卡
+
+
+## 界面
+
+![interface](images/interface.png)
+
+![playing](images/playing.png)

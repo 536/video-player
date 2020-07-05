@@ -126,6 +126,9 @@ class UI(QWidget):
     def action_double_clicked(self):
         pass
 
+    def action_open(self):
+        pass
+
     def action_play(self):
         pass
 
