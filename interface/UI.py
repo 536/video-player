@@ -13,17 +13,6 @@ from PyQt5.QtWidgets import *
 from sources import sources
 
 
-class CommonHelper(object):
-    @staticmethod
-    def read(qss):
-        try:
-            with open(qss, mode='r', encoding='utf-8') as f:
-                return f.read()
-        except Exception as e:
-            print(e)
-            return ''
-
-
 class Player(QLabel):
     double_clicked = pyqtSignal()
 
@@ -81,38 +70,34 @@ class UI(QWidget):
     def __init__(self, parent=None):
         super(UI, self).__init__(parent, flags=QtCore.Qt.WindowStaysOnTopHint)
 
-        self.setWindowTitle('Video Player')
         self.setWindowIcon(QIcon(':logo.png'))
 
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.player = Player(self)
-        self.player.double_clicked.connect(self.action_double_clicked)
 
-        self.play = QPushButton('', self)
-        self.play.setIcon(QIcon(':play.svg'))
-        self.play.clicked.connect(self.action_play)
+        self.button_play = QPushButton('', self)
+        self.button_play.setIcon(QIcon(':play.svg'))
 
-        self.reset = QPushButton('', self)
-        self.reset.setIcon(QIcon(':reset.svg'))
-        self.reset.clicked.connect(self.action_reset)
+        self.button_reset = QPushButton('', self)
+        self.button_reset.setIcon(QIcon(':reset.svg'))
 
-        self.open = QPushButton('', self)
-        self.open.setIcon(QIcon(':open.svg'))
-        self.open.setObjectName('open')
-        self.open.clicked.connect(self.action_open)
+        self.button_open = QPushButton('', self)
+        self.button_open.setIcon(QIcon(':open.svg'))
+        self.button_open.setObjectName('open')
 
-        self.spin = QSpinBox(self)
+        self.widget_spin = QSpinBox(self)
+        self.widget_spin.setAlignment(QtCore.Qt.AlignRight)
 
-        self.slider = Slider(self)
-        self.slider.setOrientation(QtCore.Qt.Horizontal)
+        self.widget_slider = Slider(self)
+        self.widget_slider.setOrientation(QtCore.Qt.Horizontal)
 
         controller_layout = QHBoxLayout()
-        controller_layout.addWidget(self.play)
-        controller_layout.addWidget(self.reset)
-        controller_layout.addWidget(self.slider, stretch=1)
-        controller_layout.addWidget(self.spin)
-        controller_layout.addWidget(self.open)
+        controller_layout.addWidget(self.button_play)
+        controller_layout.addWidget(self.button_reset)
+        controller_layout.addWidget(self.widget_slider, stretch=1)
+        controller_layout.addWidget(self.widget_spin)
+        controller_layout.addWidget(self.button_open)
 
         controller_layout.setContentsMargins(0, 0, 0, 0)
         controller_layout.setSpacing(0)
@@ -123,23 +108,11 @@ class UI(QWidget):
         main_layout.addLayout(controller_layout)
         self.setLayout(main_layout)
 
-    def action_double_clicked(self):
-        pass
-
-    def action_open(self):
-        pass
-
-    def action_play(self):
-        pass
-
-    def action_reset(self):
-        pass
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     win = UI()
-    style_sheet = CommonHelper.read('../sources/style.qss')
+    style_sheet = open('../sources/style.qss', mode='r', encoding='utf-8').read()
     win.setStyleSheet(style_sheet)
     win.show()
     sys.exit(app.exec_())
