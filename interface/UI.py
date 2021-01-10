@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*- 
 # !/usr/bin/env python3
-
-# Name: UI.py
-# Author: https://github.com/536
-# Create Time: 2020-06-01 20:49
 import sys
 
 from PyQt5 import QtCore, QtGui
@@ -112,7 +108,7 @@ class UI(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     win = UI()
-    style_sheet = open('../sources/style.qss', mode='r', encoding='utf-8').read()
+    style_sheet = open(r'../sources/style.qss', mode='r', encoding='utf-8').read()
     win.setStyleSheet(style_sheet)
     win.show()
     sys.exit(app.exec_())

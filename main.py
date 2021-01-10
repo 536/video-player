@@ -1,32 +1,16 @@
 # -*- coding: utf-8 -*- 
 # !/usr/bin/env python3
-
-# Name: main.py
-# Author: https://github.com/536
-# Create Time: 2020-06-01 20:54
 import sys
 import time
-import datetime
 
 import cv2
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtCore import QMutexLocker, QMutex, QThread, QObject, pyqtSignal, QSize
+from PyQt5.QtCore import QMutexLocker, QMutex, QThread, pyqtSignal
 from PyQt5.QtGui import QImage, QPixmap, QIcon
-from PyQt5.QtWidgets import QApplication, QStyle, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QFileDialog, QMessageBox
 
 from interface.UI import UI
 from settings import APP_NAME
-
-
-class CommonHelper(object):
-    @staticmethod
-    def read(qss):
-        try:
-            with open(qss, mode='r', encoding='utf-8') as f:
-                return f.read()
-        except Exception as e:
-            print(e)
-            return ''
 
 
 class VideoTimer(QThread):
@@ -189,7 +173,7 @@ class MainWindow(UI):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     win = MainWindow()
-    style_sheet = CommonHelper.read('./sources/style.qss')
+    style_sheet = open(r'./sources/style.qss', mode='r', encoding='utf-8').read()
     win.setStyleSheet(style_sheet)
     win.show()
     sys.exit(app.exec_())
